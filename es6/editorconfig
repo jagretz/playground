@@ -1,0 +1,9 @@
+# EditorConfig API http://EditorConfig.org
+# VS Code extension maintained at https://github.com/editorconfig/editorconfig-vscode
+# top-most EditorConfig file
+root = true
+ 
+[*]
+indent_style = tab
+indent_size = 4 # "indent_style = tab" uses tab-width with a default to indent-size
+trim_trailing_whitespace = true
