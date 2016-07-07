@@ -181,11 +181,12 @@ describe('ES2015 Class definition', function () {
 	/**
 	 * Describes how to use inheritence with the class syntax.
 	 * Inheritence is nothing new. You could have used traditional inheritence by
-	 * manipulating prototype references or using third party libraries, but the
+	 * manipulating the prototype references or using third party libraries, but the
 	 * class syntax provides a much cleaner and more understandable approach.
 	 * <p>
 	 * Inheritence is achieved using the 'extends' keyword. ie
-	 *      class Student extends Person {}
+	 *   class Student extends Person {}
+	 * @see <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes/extends">MDN extends</a>
 	 */
 	describe('can have inheritence using extends', function () {
 
@@ -199,54 +200,100 @@ describe('ES2015 Class definition', function () {
 			set name(name) {
 				this._name = name;
 			}
-			doWork() {
+			doStuff() {
 				return 'pro bono';
+			}
+			walk() {
+				return 'is walking';
 			}
 		}
 
+		/**
+		 * The `extends` keyword is used to inherit from the `Person` class.
+		 */
 		class Student extends Person {
 			constructor(id, name) {
 				super(name);
 				this.id = id;
 			}
-			doWork(proBono) {
+			doStuff(proBono) {
 				return 'paid';
+			}
+			walk() {
+				return super.walk() + ' and reading';
 			}
 		}
 
 		it('can have a super, or parent, class using super', function () {
 			let jacob = new Student('001', 'Jacob');
+
 			expect(jacob.id).toBe('001');
-			expect(jacob.doWork()).toBe('paid');
+			expect(jacob.doStuff()).toBe('paid');
 			expect(jacob.name).toBe('Jacob');
 		});
 
 		/**
-		 * The Student doWork() function overrides its parent Person doWork() function.
+		 * Extending a superclass requires a call to `super()`. `super()` must appear alone and
+		 * must be used before the `this` operator can be used.
+		 * <p>
+		 * The subclass doesn't require a constructor. If no constructor is provided the interpreter
+		 * will place a call to super() for you. However, if you provide a constructor it must
+		 * explicitly make the call to super() or the subclass will not call the parent constructor
+		 * but instead through a reference error at runtime.
+		 *
+		 * @see <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/super">MDN super</a>
+		 */
+		it('can extend built-in objects', function() {
+			class DateExtends extends Date {
+				constructor() {
+					super();
+				}
+			}
+
+			expect(new DateExtends()).toEqual(jasmine.any(Date));
+			expect(DateExtends.prototype).toEqual(jasmine.any(Object));
+		});
+
+		/**
+		 * This may seem like something you shouldn't do but it is allowed. Extending `null` works
+		 * the same as extending a normal class except that the prototype will not inherit from
+		 * `Object.prototype`.
+		 */
+		it('can extend null', function() {
+			class NullExtends extends null {
+				// empty object
+			}
+
+			expect(Object.getPrototypeOf(NullExtends.prototype)).toBe(null);
+		});
+
+		/**
+		 * The Student doStuff() function overrides its parent Person doStuff() function.
 		 */
 		it('can override super class methods', function () {
 			let jacob = new Student('001', 'Jacob');
 			let calie = new Person('Calie');
 
-			expect(jacob.doWork()).toBe('paid');
-			expect(calie.doWork()).toBe('pro bono');
+			expect(jacob.doStuff()).toBe('paid');
+			expect(calie.doStuff()).toBe('pro bono');
 		});
 
-		xit('can use super inside any method to call the overriden super (parent) method matching the same method name', function () {
+		it('can use super inside any method to call the overriden super (parent) method matching the same method name', function () {
 			/**
-			 * To achieve this use the super() method and that will invoke the parent objects overriden method; ie
-			 *      doWork() {
-			 *          super();
-			 *      }
+			 * To achieve this use the super() method and that will invoke the parent objects
+			 * overriden method; ie
+			 *   walk() {
+			 *       super();
+			 *   }
 			 */
-			// let jacob = new Student('001', 'Jacob');
-			// expect(jacob.doWork(true)).toBe('pro bono');
+			let jacob = new Student('001', 'Jacob');
+			expect(jacob.walk()).toBe('is walking and reading');
 		});
 
 		xit('can use super to invoke any function on the parent class', function () {
 			/**
 			 * to achieve this you would simple add functionality to the Objects method as such:
-			 *      doWork() {
+			 *      doStuff() {
 			 *          super.foo();
 			 *      }
 			 */
