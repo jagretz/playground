@@ -142,19 +142,52 @@ describe('ES2015 Class definition', function () {
 			*    `get getFoo() {}`
 			*    `set setFoo(foo) {}`
 			 */
-		xdescribe('false! can change get/set function names so we can rename our private data without a leading underscore', function () {
+		xdescribe('cannot change get/set function names so we can rename our private data without a leading underscore', function () {
+			//IIFE enclosing example
+			(function() {
+				function Es5FooBar(foo) {
+					// internal property: public, accessible & mutable
+					this.foo = foo || 'no name';
+
+					// property descriptor: public & immutable
+					Object.defineProperty(this, 'privateFoo', {
+						writable: false,
+						value: 'private and immutable'
+					});
+					/* property descriptor: sudo-immutable but modifiable;
+					We cannot change to a different reference but can change internals. ie
+					  let e = new Es5FooBar();
+					  e.modifiableObject = new Es5FooBar(); // Not allowed. Some interpreters may throw an error, but Chrome just eats it.
+					  e.modifiableObject.modified = true; // allowed!
+					*/
+					Object.defineProperty(this, 'modifiableObject', {
+						writable: false,
+						value: {}
+					});
+					/* private property: truly private & truly immutable. ie
+					  let e = new Es5FooBar();
+					  e.p // 'private'
+					  e.p = 'not private' // not allowed, swallows error
+					  e._p = 'new internal property'; // allowed but isn't the same as what e.p returns.
+					  e.p; // 'private' --> still private, still immutable
+					*/
+					var _p = 'private';
+					Object.defineProperty(this, 'p', {
+						get: function getP() {
+							return _p;
+						}
+					});
+				}
+			})();
 
 			class FooBar {
 				constructor(foo) {
 					this.foo = foo;
 				}
-
-				get getFoo() {
-					return this.foo;
-				}
-
+				get getFoo() { return this.foo; }
 				set setFoo(foo) {
 					this.foo = foo;
+					return this.foo;
 				}
 			}
 
